@@ -1,43 +1,44 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 
-const images = ref([]); // Stocke la liste des images récupérées du backend
-const selectedImage = ref(null); // Stocke l'ID de l'image sélectionnée
+const images = ref([]); // Stores the list of images retrieved from the backend
+const selectedImage = ref(null); // Stores the ID of the selected image
+const downloadedImageUrl = ref(null); // Stores the downloaded image URL
 
-// Utilisation du hook onMounted pour exécuter du code après le montage du composant
+// Use the onMounted hook to execute code after the component is mounted
 onMounted(async () => {
   try {
-    // GET pour récupérer la liste des images
+    // GET to retrieve the list of images
     const response = await axios.get('/images');
-    // Update avec les données reçues du backend
+    // Update with the data received from the backend
     images.value = response.data;
   } catch (error) {
-    console.error('Erreur lors de la récupération des images:', error);
+    console.error('Error fetching images:', error);
   }
 });
 
-// Fonction pour afficher l'image sélectionnée
+// Function to show the selected image
 function show() {
-  if (selectedImage.value !== null) { // Si mage est sélectionnée
-    // Objet image correspondant à l'ID sélectionné
-    const selectedImageData = images.value.find(img => img.id === selectedImage.value);
-    if (selectedImageData) { // Vérifier si l'objet image est trouvé
-      const imageUrl = `/${selectedImageData.name}`; // Construire l'URL de l'image à partir du nom
-      const imageEl = document.querySelector("img"); // Sélectionner l'élément img dans le DOM
-      axios.get(imageUrl, { responseType: "blob" })
-        .then((response: AxiosResponse) => {
-          // Convertir les données de l'image en URL de données (base64)
-          const reader = new window.FileReader();
-          reader.readAsDataURL(response.data); 
-          reader.onload = function() {
-            // Mettre à jour l'attribut src de l'élément img avec l'URL de données de l'image
-            const imageDataUrl = (reader.result as string);
-            imageEl.setAttribute("src", imageDataUrl);
-          };
-        })
-        .catch(error => {console.error('Erreur lors du chargement de l\'image:', error);
-        });
+  downloadImage();
+}
+
+// Function to download the selected image
+async function downloadImage() {
+  if (selectedImage.value !== null) {
+    try {
+      // GET to download the selected image
+      const response = await axios.get(`/images/${selectedImage.value}`, { responseType: 'blob' });
+
+      // Convert the blob to a data URL
+      const reader = new window.FileReader();
+      reader.readAsDataURL(response.data);
+      reader.onload = function () {
+        const imageDataUrl = reader.result as string;
+        downloadedImageUrl.value = imageDataUrl;
+      };
+    } catch (error) {
+      console.error('Error downloading image:', error);
     }
   }
 }
@@ -47,35 +48,47 @@ function show() {
   <div>
     <h1>{{ msg }}</h1>
 
-    <!-- Affiche ce bloc si la liste des images n'est pas vide -->
+    <!-- Display this block if the list of images is not empty -->
     <div class="card" v-if="images.length > 0">
-      <!-- Sélectionnez une image -->
-      <label for="imageSelect">Sélectionnez une image :</label>
+      <!-- Select an image -->
+      <label for="imageSelect">Select an image:</label>
       <select id="imageSelect" v-model="selectedImage">
-        <!-- Option par défaut -->
-        <option :key="null" :value="null">Aucune</option>
-        <!-- Options dans la liste déroulante -->
+        <!-- Default option -->
+        <option :key="null" :value="null">None</option>
+        <!-- Options in the dropdown list -->
         <option v-for="image in images" :key="image.id" :value="image.id">{{ image.name }}</option>
       </select>
 
-      <!-- Affiche le nom de l'image sélectionnée ou un message si aucune image n'est sélectionnée -->
+      <!-- Display the name of the selected image or a message if no image is selected -->
       <div>
-        <h2>L'image sélectionnée :</h2>
+        <h2>Selected image:</h2>
         <p v-if="selectedImage !== null">
-          Vous avez sélectionné : {{ images.find(img => img.id === selectedImage)?.name }}
+          You selected: {{ images.find(img => img.id === selectedImage)?.name }}
           <button @click="show">
-            Afficher
+            Show
           </button>
         </p>
         <p v-else>
-          Aucune image sélectionnée.
+          No image selected.
         </p>
       </div>
+
+      <!-- Display the downloaded image if available -->
+      <img v-if="downloadedImageUrl" :src="downloadedImageUrl" alt="Downloaded Image" class="resizable-image"/>
     </div>
 
-    <!-- Affiche ce bloc si la liste des images est vide -->
+    <!-- Display this block if the list of images is empty -->
     <div class="card" v-else>
-      <p>Aucune image disponible.</p>
+      <p>No images available.</p>
     </div>
   </div>
 </template>
+
+<style>
+.resizable-image {
+  max-width: 20%;  /* Set maximum width */
+  height: auto;     /* Automatically adjust height to maintain aspect ratio */
+  display: block;   /* Remove any default inline styling */
+  margin: 0 auto;   /* Center the image horizontally */
+}
+</style>
