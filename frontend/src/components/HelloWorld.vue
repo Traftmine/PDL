@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import axios, { AxiosResponse } from 'axios';
 
 const images = ref([]); // Stores the list of images retrieved from the backend
@@ -21,6 +21,11 @@ onMounted(async () => {
 // Function to show the selected image
 function showImage() {
   downloadImage();
+}
+
+// Function to show the selected image
+function hideImage() {
+  downloadedImageUrl.value = null;
 }
 
 // Function to download the selected image
@@ -48,6 +53,10 @@ function toggleGallery() {
   showGallery.value = !showGallery.value;
 }
 
+// Watch for changes in selectedImage
+watch(selectedImage, (newValue) => {
+  if (newValue === null) { hideImage();} });
+
 </script>
 
 <template>
@@ -67,7 +76,6 @@ function toggleGallery() {
 
       <!-- Display the name of the selected image or a message if no image is selected -->
       <div>
-        <h2>Selected image:</h2>
         <p v-if="selectedImage !== null">
           You selected: {{ images.find(img => img.id === selectedImage)?.name }}
           <button @click="showImage">
