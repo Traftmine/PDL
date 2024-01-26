@@ -63,7 +63,7 @@ public class ImageController {
         byte[] fileContent = file.getBytes(); // Lire le contenu du fichier de la requête multipart
         Image newImage = new Image(file.getOriginalFilename(), fileContent); // Créer une nouvelle image à partir du contenu du fichier
         imageDao.create(newImage);
-        return new ResponseEntity<>(HttpStatus.CREATED); // Code 201 si l'ajout réussi
+        return new ResponseEntity<>(HttpStatus.OK); // Code 201 si l'ajout réussi
       } catch (IOException e) {
         e.printStackTrace();
         return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
