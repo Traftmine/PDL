@@ -6,6 +6,10 @@ const images = ref([]); // Stores the list of images retrieved from the backend
 const selectedImage = ref(null); // Stores the ID of the selected image
 const downloadedImageUrl = ref(null); // Stores the downloaded image URL
 const showGallery = ref(false); // Flag to determine whether to show the gallery
+const fileInputRef = ref(null);
+
+// -------------------------- FUNCTIONS -------------------------- //
+
 // Use the onMounted hook to execute code after the component is mounted
 onMounted(async () => {
   try {
@@ -17,6 +21,19 @@ onMounted(async () => {
     console.error('Error fetching images:', error);
   }
 });
+
+// Watch for changes in selectedImage
+watch(selectedImage, (newValue) => {
+  if (newValue === null) { hideImage();} });
+
+// -------------------------- IMAGE GALLERY -------------------------- //
+
+// Function to show the selected image
+function toggleGallery() {
+  showGallery.value = !showGallery.value;
+}
+
+// -------------------------- IMAGE DOWNLOAD -------------------------- //
 
 // Function to show the selected image
 function showImage() {
@@ -48,14 +65,45 @@ async function downloadImage() {
   }
 }
 
-// Function to show the selected image
-function toggleGallery() {
-  showGallery.value = !showGallery.value;
+// -------------------------- IMAGE UPLOAD -------------------------- //
+
+// Function to handle image upload
+function uploadImage() {
+  uploadIm();
 }
 
-// Watch for changes in selectedImage
-watch(selectedImage, (newValue) => {
-  if (newValue === null) { hideImage();} });
+async function uploadIm() {
+  const fileInput = fileInputRef;
+
+  if (fileInput.files.length > 0) {
+    const formData = new FormData();
+    formData.append('image', fileInput.files[0]);
+
+    try {
+      const uploadUrl = '/images';
+      const response = await axios.post(uploadUrl, formData);
+
+      console.log('Image upload successful:', response.data);
+      images.value = response.data;
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      // Consider displaying an error message to the user
+    }
+  }
+}
+
+// -------------------------- IMAGE UPLOAD FORM -------------------------- //
+
+// Function to show the form to upload images
+function showUploadForm() {
+  const uploadForm = document.getElementById('uploadForm');
+  // Toggle the display of the upload form
+  if (uploadForm.style.display === 'none') {
+    uploadForm.style.display = 'block';
+  } else {
+    uploadForm.style.display = 'none';
+  }
+}
 
 </script>
 
@@ -113,10 +161,25 @@ watch(selectedImage, (newValue) => {
         />
       </div>
     </div>
+
+    <!-- Display "Upload" button -->
+    <div>
+      <button class="upload" @click="showUploadForm"> Upload </button>
+    </div>
+
+    <div id="uploadForm" style="display: none;">
+      <form @submit.prevent="uploadImage">
+        <label for="fileInput">Upload Image:</label>
+        <input type="file" id="fileInput" ref="fileInput" accept="image/*" />
+        <button type="submit">Upload</button>
+      </form>
+    </div>
+
   </div>
 </template>
 
 <style>
+
 .resizable-image {
   max-width: 20%;  /* Set maximum width */
   height: auto;     /* Automatically adjust height to maintain aspect ratio */
@@ -127,6 +190,14 @@ watch(selectedImage, (newValue) => {
 .galerie {
   position: absolute;
   top: 10px;
+  left: 10px;
+  padding: 5px;
+  overflow-x: auto;
+}
+
+.upload {
+  position: absolute;
+  top: 50px;
   left: 10px;
   padding: 5px;
   overflow-x: auto;
