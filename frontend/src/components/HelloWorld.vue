@@ -37,7 +37,9 @@ function toggleGallery() {
 
 // Function to show the selected image
 function showImage() {
-  downloadImage();
+  if(downloadedImageUrl.value == null) {
+    downloadImage();}
+  else { hideImage(); }
 }
 
 // Function to show the selected image
@@ -67,28 +69,32 @@ async function downloadImage() {
 
 // -------------------------- IMAGE UPLOAD -------------------------- //
 
-// Function to handle image upload
-function uploadImage() {
-  uploadIm();
+function handleFileUpload(event) {
+  // Update the file input value
+  fileInputRef.value = event.target.files[0];
 }
 
-async function uploadIm() {
-  const fileInput = fileInputRef;
-
-  if (fileInput.files.length > 0) {
+function sub() {
+  submitFile();
+}
+async function submitFile() {
+  try {
     const formData = new FormData();
-    formData.append('image', fileInput.files[0]);
+    formData.append('image', fileInputRef.value);
 
-    try {
-      const uploadUrl = '/images';
-      const response = await axios.post(uploadUrl, formData);
-
-      console.log('Image upload successful:', response.data);
-      images.value = response.data;
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      // Consider displaying an error message to the user
-    }
+    await axios.post('/images', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+    // Refresh the images after successful upload
+    const response = await axios.get('/images');
+    images.value = response.data;
+    // Reset the file input and hide the upload form
+    fileInputRef.value = null;
+    showUploadForm();
+  } catch (error) {
+    console.error('Error uploading image:', error);
   }
 }
 
@@ -102,6 +108,22 @@ function showUploadForm() {
     uploadForm.style.display = 'block';
   } else {
     uploadForm.style.display = 'none';
+  }
+}
+
+// -------------------------- DELETE IMAGE -------------------------- //
+
+function deleteImage() {
+  if (confirm('Are you sure you want to delete this image?')) {
+    axios.delete(`/images/${selectedImage.value}`)
+      .then(() => {
+        // Remove the deleted image from the images array
+        images.value = images.value.filter(image => image.id !== selectedImage.value);
+        console.log('Image deleted successfully.');
+      })
+      .catch(error => {
+        console.error('Error deleting image:', error);
+      });
   }
 }
 
@@ -126,9 +148,10 @@ function showUploadForm() {
       <div>
         <p v-if="selectedImage !== null">
           You selected: {{ images.find(img => img.id === selectedImage)?.name }}
-          <button @click="showImage">
-            Show
-          </button>
+          <div class="buttonImgSelected">
+            <button class="show-button" @click="showImage"> Show </button>
+            <button @click="deleteImage"> Delete </button>
+        </div>
         </p>
         <p v-else>
           No image selected.
@@ -168,23 +191,29 @@ function showUploadForm() {
     </div>
 
     <div id="uploadForm" style="display: none;">
-      <form @submit.prevent="uploadImage">
-        <label for="fileInput">Upload Image:</label>
-        <input type="file" id="fileInput" ref="fileInput" accept="image/*" />
-        <button type="submit">Upload</button>
-      </form>
+      <div class="container">
+        <div>
+          <p>
+            <input type="file" ref="fileInput" @change="handleFileUpload( $event )"/>
+            <button @click="sub"> Submit </button>
+          </p>
+        </div>
+      </div>
     </div>
 
   </div>
 </template>
 
+
 <style>
 
+/* GALERY and IMAGES */
+
 .resizable-image {
-  max-width: 20%;  /* Set maximum width */
-  height: auto;     /* Automatically adjust height to maintain aspect ratio */
-  display: block;   /* Remove any default inline styling */
-  margin: 10px auto;   /* Center the image horizontally */
+  max-width: 20%;
+  height: auto;
+  display: block;
+  margin: 10px auto;
 }
 
 .galerie {
@@ -195,6 +224,14 @@ function showUploadForm() {
   overflow-x: auto;
 }
 
+.galerie .resizable-image {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 10px auto;
+}
+/* UPLOAD */
+
 .upload {
   position: absolute;
   top: 50px;
@@ -203,12 +240,14 @@ function showUploadForm() {
   overflow-x: auto;
 }
 
-/* Adjust the styles for images in the gallery */
-.galerie .resizable-image {
-  max-width: 100%;  /* Set maximum width */
-  height: auto;     /* Automatically adjust height to maintain aspect ratio */
-  display: block;   /* Remove any default inline styling */
-  margin: 10px auto; /* Center the image horizontally with some margin */
+/* BUTTONS */
+
+.buttonImgSelected{
+  margin-top: 10px;
+}
+
+.show-button{
+  margin-right: 10px;
 }
 
 </style>
