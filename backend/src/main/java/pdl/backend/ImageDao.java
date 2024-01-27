@@ -22,7 +22,7 @@ public class ImageDao implements Dao<Image> {
     byte[] fileContent;
     try {
       fileContent = Files.readAllBytes(imgFile.getFile().toPath());
-      Image img = new Image("logo.jpg", fileContent);
+      Image img = new Image("test.jpg", fileContent); // modify here for image name
       images.put(img.getId(), img);
     } catch (final IOException e) {
       e.printStackTrace();
