@@ -60,6 +60,9 @@ public class ImageController {
   @RequestMapping(value = "/images", method = RequestMethod.POST)
   public ResponseEntity<?> addImage(@RequestParam("file") MultipartFile file, RedirectAttributes redirectAttributes) {
       try {
+        if (!file.getContentType().endsWith(".jpg") && !file.getContentType().endsWith(".jpeg")) {
+          return new ResponseEntity<>(HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+        }
         byte[] fileContent = file.getBytes(); // Lire le contenu du fichier de la requête multipart
         Image newImage = new Image(file.getOriginalFilename(), fileContent); // Créer une nouvelle image à partir du contenu du fichier
         imageDao.create(newImage);

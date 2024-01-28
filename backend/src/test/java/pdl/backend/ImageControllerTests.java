@@ -90,9 +90,9 @@ public class ImageControllerTests {
     @Test
     @Order(8)
     public void createImageShouldReturnUnsupportedMediaType() throws Exception {
-        String fileName = "test.png";
-        MockMultipartFile multipartFile = new MockMultipartFile("file", fileName, "image/jpeg", ("src/main/resources/" + fileName).getBytes());
+        String fileName = "plot.png";
+        MockMultipartFile multipartFile = new MockMultipartFile("file", fileName, "image/png", ("src/main/resources/" + fileName).getBytes());
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart("/images").file(multipartFile);
-        this.mockMvc.perform(builder).andExpect(status().isOk());
+        this.mockMvc.perform(builder).andExpect(status().isUnsupportedMediaType());
     }
 }
