@@ -59,9 +59,7 @@ function handleFileUpload(event) {
 
 async function sub() {
   try {
-    const formData = new FormData();
-    formData.append('image', fileInputRef.value);
-    await uploadImage(formData);
+    await uploadImage(fileInputRef.value);
     images.value = await getImages();
     fileInputRef.value = null;
     showUploadForm();
@@ -166,7 +164,7 @@ function ToAPI_deleteImage() {
       <div class="container">
         <div>
           <p>
-            <input type="file" ref="fileInput" @change="handleFileUpload( $event )"/>
+            <input type="file" ref="fileInput" @change="handleFileUpload($event)"/>
             <button @click="sub"> Submit </button>
           </p>
         </div>
