@@ -1,22 +1,20 @@
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue';
-import axios, { AxiosResponse } from 'axios';
+import { getImages, downloadImage, uploadImage, deleteImage } from './http-api';
 
 const images = ref([]); // Stores the list of images retrieved from the backend
 const selectedImage = ref(null); // Stores the ID of the selected image
 const downloadedImageUrl = ref(null); // Stores the downloaded image URL
 const showGallery = ref(false); // Flag to determine whether to show the gallery
-const fileInputRef = ref(null);
+const fileInputRef = ref(null); // Stores the file to upload
 
 // -------------------------- FUNCTIONS -------------------------- //
 
 // Use the onMounted hook to execute code after the component is mounted
 onMounted(async () => {
   try {
-    // GET to retrieve the list of images
-    const response = await axios.get('/images');
     // Update with the data received from the backend
-    images.value = response.data;
+    images.value = await getImages();
   } catch (error) {
     console.error('Error fetching images:', error);
   }
@@ -33,38 +31,23 @@ function toggleGallery() {
   showGallery.value = !showGallery.value;
 }
 
-// -------------------------- IMAGE DOWNLOAD -------------------------- //
+// -------------------------- IMAGE SHOW / HIDE -------------------------- //
 
 // Function to show the selected image
 function showImage() {
-  if(downloadedImageUrl.value == null) {
-    downloadImage();}
-  else { hideImage(); }
+  if (downloadedImageUrl.value == null) {
+    downloadImage(selectedImage.value).then((url) => {downloadedImageUrl.value = url;})
+      .catch(() => {
+        console.error('Error showing downloaded image:', error);
+      });
+  } else {
+    hideImage();
+  }
 }
 
 // Function to show the selected image
 function hideImage() {
   downloadedImageUrl.value = null;
-}
-
-// Function to download the selected image
-async function downloadImage() {
-  if (selectedImage.value !== null) {
-    try {
-      // GET to download the selected image
-      const response = await axios.get(`/images/${selectedImage.value}`, { responseType: 'blob' });
-
-      // Convert the blob to a data URL
-      const reader = new window.FileReader();
-      reader.readAsDataURL(response.data);
-      reader.onload = function () {
-        const imageDataUrl = reader.result as string;
-        downloadedImageUrl.value = imageDataUrl;
-      };
-    } catch (error) {
-      console.error('Error downloading image:', error);
-    }
-  }
 }
 
 // -------------------------- IMAGE UPLOAD -------------------------- //
@@ -74,27 +57,16 @@ function handleFileUpload(event) {
   fileInputRef.value = event.target.files[0];
 }
 
-function sub() {
-  submitFile();
-}
-async function submitFile() {
+async function sub() {
   try {
     const formData = new FormData();
     formData.append('image', fileInputRef.value);
-
-    await axios.post('/images', formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-    // Refresh the images after successful upload
-    const response = await axios.get('/images');
-    images.value = response.data;
-    // Reset the file input and hide the upload form
+    await uploadImage(formData);
+    images.value = await getImages();
     fileInputRef.value = null;
     showUploadForm();
   } catch (error) {
-    console.error('Error uploading image:', error);
+    console.error('Error submitting form:', error);
   }
 }
 
@@ -113,9 +85,9 @@ function showUploadForm() {
 
 // -------------------------- DELETE IMAGE -------------------------- //
 
-function deleteImage() {
+function ToAPI_deleteImage() {
   if (confirm('Are you sure you want to delete this image?')) {
-    axios.delete(`/images/${selectedImage.value}`)
+    deleteImage(selectedImage.value)
       .then(() => {
         // Remove the deleted image from the images array
         images.value = images.value.filter(image => image.id !== selectedImage.value);
@@ -150,7 +122,7 @@ function deleteImage() {
           You selected: {{ images.find(img => img.id === selectedImage)?.name }}
           <div class="buttonImgSelected">
             <button class="show-button" @click="showImage"> Show </button>
-            <button @click="deleteImage"> Delete </button>
+            <button @click="ToAPI_deleteImage"> Delete </button>
         </div>
         </p>
         <p v-else>
