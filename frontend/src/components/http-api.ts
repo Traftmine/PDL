@@ -36,18 +36,20 @@ export async function downloadImage(imageId) {
 
 // -------------------------- IMAGE UPLOAD -------------------------- //
 
-export async function uploadImage(formData) {
-  try {
-    await axios.post(baseURL, formData, {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
-  } catch (error) {
-    console.error('Error uploading image:', error);
-    throw error;
+export async function uploadImage(file: File) {
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      await axios.post(baseURL, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      throw error;
+    }
   }
-}
 
 // -------------------------- IMAGE DELETE -------------------------- //
 

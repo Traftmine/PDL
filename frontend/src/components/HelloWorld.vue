@@ -182,7 +182,6 @@ function ToAPI_deleteImage() {
 .resizable-image {
   max-width: 20%;
   height: auto;
-  display: block;
   margin: 10px auto;
 }
 
@@ -194,12 +193,6 @@ function ToAPI_deleteImage() {
   overflow-x: auto;
 }
 
-.galerie .resizable-image {
-  max-width: 100%;
-  height: auto;
-  display: block;
-  margin: 10px auto;
-}
 /* UPLOAD */
 
 .upload {
