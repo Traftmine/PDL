@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const baseURL = '/images';  // Update with your actual backend URL
+const baseURL = '/images';  // Actual backend URL
 
 export async function getImages() {
   try {
@@ -15,7 +15,7 @@ export async function getImages() {
 // -------------------------- IMAGE DOWNLOAD -------------------------- //
 
 // Function to download the selected image
-export async function downloadImage(imageId) {
+export async function downloadImage(imageId:any) {
   try {
     // GET to download the selected image
     const response = await axios.get(`${baseURL}/${imageId}`, { responseType: 'blob' });
@@ -36,7 +36,7 @@ export async function downloadImage(imageId) {
 
 // -------------------------- IMAGE UPLOAD -------------------------- //
 
-export async function uploadImage(file: File) {
+export async function uploadImage(file: string) {
     try {
       const formData = new FormData();
       formData.append('file', file);
@@ -53,7 +53,7 @@ export async function uploadImage(file: File) {
 
 // -------------------------- IMAGE DELETE -------------------------- //
 
-export async function deleteImage(imageId) {
+export async function deleteImage(imageId:any) {
   try {
     await axios.delete(`/images/${imageId}`);
   } catch (error) {

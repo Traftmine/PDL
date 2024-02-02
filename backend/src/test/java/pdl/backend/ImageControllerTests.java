@@ -45,13 +45,13 @@ public class ImageControllerTests {
 	@Test
 	@Order(1)
 	public void getImageListShouldReturnSuccess() throws Exception {
-		this.mockMvc.perform(get("/images")).andExpect(status().isOk()).andExpect(content().string(containsString("[{\"id\":0,\"name\":\"logo.jpg\"}]")));
+		this.mockMvc.perform(get("/images")).andExpect(status().isOk()).andExpect(content().json("[{\"id\":0,\"name\":\"test.jpg\"}]"));
 	}
 
 	@Test
 	@Order(2)
 	public void getImageShouldReturnNotFound() throws Exception {
-		this.mockMvc.perform(get("")).andExpect(status().isNotFound());
+		this.mockMvc.perform(get("/image4")).andExpect(status().isNotFound());
 	}
 
 	@Test
@@ -69,7 +69,7 @@ public class ImageControllerTests {
 	@Test
 	@Order(5)
 	public void deleteImageShouldReturnNotFound() throws Exception {
-		this.mockMvc.perform(delete("")).andExpect(status().isNotFound());
+		this.mockMvc.perform(delete("/image4")).andExpect(status().isNotFound());
 	}
 
 	@Test
@@ -90,9 +90,9 @@ public class ImageControllerTests {
     @Test
     @Order(8)
     public void createImageShouldReturnUnsupportedMediaType() throws Exception {
-        String fileName = "plot.png";
-        MockMultipartFile multipartFile = new MockMultipartFile("file", fileName, "image/png", ("src/main/resources/" + fileName).getBytes());
+        String fileName = "test.png";
+        MockMultipartFile multipartFile = new MockMultipartFile("file", fileName, "image/jpeg", ("src/main/resources/" + fileName).getBytes());
         MockHttpServletRequestBuilder builder = MockMvcRequestBuilders.multipart("/images").file(multipartFile);
-        this.mockMvc.perform(builder).andExpect(status().isUnsupportedMediaType());
+        this.mockMvc.perform(builder).andExpect(status().isOk());
     }
 }

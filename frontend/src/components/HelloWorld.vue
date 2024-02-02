@@ -2,11 +2,11 @@
 import { ref, onMounted, watch } from 'vue';
 import { getImages, downloadImage, uploadImage, deleteImage } from './http-api';
 
-const images = ref([]); // Stores the list of images retrieved from the backend
+const images = ref(Array()); // Stores the list of images retrieved from the backend
 const selectedImage = ref(null); // Stores the ID of the selected image
-const downloadedImageUrl = ref(null); // Stores the downloaded image URL
+const downloadedImageUrl = ref(""); // Stores the downloaded image URL
 const showGallery = ref(false); // Flag to determine whether to show the gallery
-const fileInputRef = ref(null); // Stores the file to upload
+const fileInputRef = ref(""); // Stores the file to upload
 
 // -------------------------- FUNCTIONS -------------------------- //
 
@@ -21,7 +21,7 @@ onMounted(async () => {
 });
 
 // Watch for changes in selectedImage
-watch(selectedImage, (newValue) => {
+watch(selectedImage, (newValue:any) => {
   if (newValue === null) { hideImage();} });
 
 // -------------------------- IMAGE GALLERY -------------------------- //
@@ -35,9 +35,9 @@ function toggleGallery() {
 
 // Function to show the selected image
 function showImage() {
-  if (downloadedImageUrl.value == null) {
+  if (downloadedImageUrl.value == "") {
     downloadImage(selectedImage.value).then((url) => {downloadedImageUrl.value = url;})
-      .catch(() => {
+      .catch((error) => {
         console.error('Error showing downloaded image:', error);
       });
   } else {
@@ -47,12 +47,12 @@ function showImage() {
 
 // Function to show the selected image
 function hideImage() {
-  downloadedImageUrl.value = null;
+  downloadedImageUrl.value = "";
 }
 
 // -------------------------- IMAGE UPLOAD -------------------------- //
 
-function handleFileUpload(event) {
+function handleFileUpload(event:any) {
   // Update the file input value
   fileInputRef.value = event.target.files[0];
 }
@@ -61,7 +61,7 @@ async function sub() {
   try {
     await uploadImage(fileInputRef.value);
     images.value = await getImages();
-    fileInputRef.value = null;
+    fileInputRef.value = "";
     showUploadForm();
   } catch (error) {
     console.error('Error submitting form:', error);
@@ -73,12 +73,14 @@ async function sub() {
 // Function to show the form to upload images
 function showUploadForm() {
   const uploadForm = document.getElementById('uploadForm');
-  // Toggle the display of the upload form
-  if (uploadForm.style.display === 'none') {
-    uploadForm.style.display = 'block';
-  } else {
-    uploadForm.style.display = 'none';
-  }
+  if (uploadForm != null) {
+    // Toggle the display of the upload form
+    if (uploadForm.style.display === 'none') {
+      uploadForm.style.display = 'block';
+    } else {
+      uploadForm.style.display = 'none';
+    }
+  } else { console.log("uploadForm null [showUploadForm()]");}
 }
 
 // -------------------------- DELETE IMAGE -------------------------- //
@@ -88,7 +90,7 @@ function ToAPI_deleteImage() {
     deleteImage(selectedImage.value)
       .then(() => {
         // Remove the deleted image from the images array
-        images.value = images.value.filter(image => image.id !== selectedImage.value);
+        images.value = images.value.filter((image:any) => image.id !== selectedImage.value);
         console.log('Image deleted successfully.');
       })
       .catch(error => {
@@ -101,15 +103,13 @@ function ToAPI_deleteImage() {
 
 <template>
   <div>
-    <h1>{{ msg }}</h1>
-
     <!-- Display this block if the list of images is not empty -->
     <div class="card" v-if="images.length > 0">
       <!-- Select an image -->
       <label for="imageSelect">Select an image:</label>
       <select id="imageSelect" v-model="selectedImage">
         <!-- Default option -->
-        <option :key="null" :value="null">None</option>
+        <option :key="undefined" :value="null">None</option>
         <!-- Options in the dropdown list -->
         <option v-for="image in images" :key="image.id" :value="image.id">{{ image.name }}</option>
       </select>
