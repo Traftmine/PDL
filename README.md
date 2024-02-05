@@ -15,5 +15,6 @@ L'implémentation des fichiers .xml a été très très complexe, le TD n'était
 
 # À implémenter :
 
-Il y a un bug lors qu'on souhaite ajouter la même image qui vient d'être supprimer
+Il y a un bug lors qu'on souhaite ajouter une image après avoir suprrimer une autre.
+Il y a un bug si l'on souhaite ajouter 2 fois de suite la même image, /!\ pas si on alterne.
 Il faut aussi que je modifie le style de gallerie pour que ça soit plus agréable à voir, affichage horizontal.
