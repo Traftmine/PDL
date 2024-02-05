@@ -5,9 +5,7 @@ import HelloWorld from './components/HelloWorld.vue'
 
 <template>
   <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="image selectionée" />
-    </a>
+    <h1> Image handler </h1>
   </div>
   <HelloWorld msg="Vite + Vue" />
 </template>

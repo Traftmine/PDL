@@ -183,6 +183,7 @@ function ToAPI_deleteImage() {
   max-width: 20%;
   height: auto;
   margin: 10px auto;
+  transition: filter 0.3s ease-in-out;
 }
 
 .galerie {
@@ -193,6 +194,9 @@ function ToAPI_deleteImage() {
   overflow-x: auto;
 }
 
+.resizable-image:hover {
+  filter: drop-shadow(0 0 0.5em purple);
+}
 /* UPLOAD */
 
 .upload {
